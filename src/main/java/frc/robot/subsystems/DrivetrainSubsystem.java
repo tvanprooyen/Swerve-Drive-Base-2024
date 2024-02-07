@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SwerveModule;
@@ -16,17 +18,20 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.PathPlannerConstants;
 import frc.robot.Constants.SDSConstants;
 
 public class DrivetrainSubsystem extends SubsystemBase {
     //Base Swerve Requirements
     private static final double MAX_VOLTAGE = 12.0;
-    public static final double MAX_VELOCITY_METERS_PER_SECOND = 4.14528;
+    public static final double MAX_VELOCITY_METERS_PER_SECOND = SDSConstants.MAX_VELOCITY_METERS_PER_SECOND;
     public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
             Math.hypot(SDSConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, SDSConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
@@ -51,6 +56,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
     private double RotateSet;
 
     private boolean rotateLock = false;
+
+    //Create Field for visualizing PathPlanner and Odometery
+    private Field2d field = new Field2d();
 
     public DrivetrainSubsystem() {
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
@@ -127,6 +135,33 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         RotateSet = 0;
         this.rotateLock = false;
+
+        //PathPlanner
+        // Configure AutoBuilder
+        AutoBuilder.configureHolonomic(
+        this::robotPose, 
+        this::resetOdometry, 
+        this::getSpeeds, 
+        this::driveRobotRelative, 
+        PathPlannerConstants.pathFollowerConfig,
+        () -> {
+            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // This will flip the path being followed to the red side of the field.
+            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+        },
+        this
+        );
+
+        // Set up custom logging to add the current path to a field 2d widget
+        PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
+
+        SmartDashboard.putData("Field", field);
     }
 
     public void zeroGyroscope() {
@@ -147,12 +182,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public Pose2d robotPose() {
-        return new Pose2d(odometry.getPoseMeters().getTranslation(), Rotation2d.fromDegrees(0.0));
-    }
-
-
-    public SwerveModuleState[] robotModuleStates(){
-        return kinematics.toSwerveModuleStates(chassisSpeeds);
+        return odometry.getPoseMeters();  //new Pose2d(odometry.getPoseMeters().getTranslation(), Rotation2d.fromDegrees(0.0));
     }
 
     public double getGyroYaw() {
@@ -169,8 +199,28 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return odometry.getPoseMeters();
     }
 
+    // Auto Drive
+    public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
+        driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, robotPose().getRotation()));
+    }
+
+    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+        ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+
+        this.chassisSpeeds = targetSpeeds;
+    }
+
+    //Teleop Drive
     public void drive(ChassisSpeeds chassisSpeeds) {
         this.chassisSpeeds = chassisSpeeds;
+    }
+
+    public ChassisSpeeds getSpeeds() {
+        return this.chassisSpeeds;
+    }
+
+    public SwerveModuleState[] robotModuleStates(){
+        return kinematics.toSwerveModuleStates(this.chassisSpeeds);
     }
 
     public void setPIDRotateValue(double RotateSet) {
@@ -225,9 +275,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
             backRightModule.getPosition()
         });
 
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
+        field.setRobotPose(robotPose());
 
-        setModuleStates(states);
+        setModuleStates(robotModuleStates());
     }
 
     public void setModuleStates(SwerveModuleState[] states) {
