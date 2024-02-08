@@ -139,23 +139,23 @@ public class DrivetrainSubsystem extends SubsystemBase {
         //PathPlanner
         // Configure AutoBuilder
         AutoBuilder.configureHolonomic(
-        this::robotPose, 
-        this::resetOdometry, 
-        this::getSpeeds, 
-        this::driveRobotRelative, 
-        PathPlannerConstants.pathFollowerConfig,
-        () -> {
-            // Boolean supplier that controls when the path will be mirrored for the red alliance
-            // This will flip the path being followed to the red side of the field.
-            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+            this::robotPose, 
+            this::resetOdometry, 
+            this::getSpeeds, 
+            this::driveRobotRelative, 
+            PathPlannerConstants.pathFollowerConfig,
+            () -> {
+                // Boolean supplier that controls when the path will be mirrored for the red alliance
+                // This will flip the path being followed to the red side of the field.
+                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-            var alliance = DriverStation.getAlliance();
-            if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-            }
-            return false;
-        },
-        this
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+            },
+            this
         );
 
         // Set up custom logging to add the current path to a field 2d widget
@@ -193,10 +193,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public Rotation2d getRotation() {
         return odometry.getPoseMeters().getRotation();
-    }
-
-    public Pose2d getPos() {
-        return odometry.getPoseMeters();
     }
 
     // Auto Drive

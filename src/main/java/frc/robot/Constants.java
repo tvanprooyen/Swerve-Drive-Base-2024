@@ -27,8 +27,8 @@ public final class Constants {
    * This is where we setup all the constants for our swerve modules
    */
   public static final class SDSConstants {
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.2794;
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.2794;
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.62865; //24.750000 Inches to Meters
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.62865; //24.750000 Inches to Meters
 
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 4.14528;
 
