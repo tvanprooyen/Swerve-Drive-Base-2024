@@ -27,8 +27,8 @@ public final class Constants {
    * This is where we setup all the constants for our swerve modules
    */
   public static final class SDSConstants {
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.62865; //24.750000 Inches to Meters
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.62865; //24.750000 Inches to Meters
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.2794;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.2794;
 
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 4.14528;
 
@@ -52,7 +52,7 @@ public final class Constants {
     public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 1;
     public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 2;
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 12;
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(337.236);
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(140);
   }
 
   /**

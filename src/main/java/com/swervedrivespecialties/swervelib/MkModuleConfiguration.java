@@ -135,7 +135,7 @@ public class MkModuleConfiguration {
 
     public static MkModuleConfiguration getDefaultSteerNEO() {
         MkModuleConfiguration config = new MkModuleConfiguration();
-        config.setSteerPID(1.0, 0.0, 0.1);
+        config.setSteerPID(0.5, 0.0, 2);
         return config;
     }
 }

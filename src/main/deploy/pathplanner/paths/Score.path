@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.678477614558091,
-        "y": 4.58891221896934
+        "x": 3.025428273078769,
+        "y": 4.076143707842971
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.789375872132782,
-        "y": 4.631933271022177
+        "x": 2.8116445121779137,
+        "y": 4.261422967290379
       },
       "isLocked": false,
       "linkedName": "game piece 1"
     },
     {
       "anchor": {
-        "x": 3.394537307858158,
-        "y": 4.76099642718069
+        "x": 2.36982473964948,
+        "y": 4.503711229644682
       },
       "prevControl": {
-        "x": 4.312319751652028,
-        "y": 4.804017479233528
+        "x": 2.840149013631361,
+        "y": 4.5322157310981295
       },
       "nextControl": {
-        "x": 2.8432719593933977,
-        "y": 4.735155863971404
+        "x": 2.0130347709404224,
+        "y": 4.482087595177466
       },
       "isLocked": false,
       "linkedName": null
@@ -36,8 +36,8 @@
         "y": 3.800192931333985
       },
       "prevControl": {
-        "x": 2.4624145133800113,
-        "y": 4.560231517600782
+        "x": 2.170293229475348,
+        "y": 4.061891457116247
       },
       "nextControl": null,
       "isLocked": false,
@@ -66,10 +66,10 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 300.0,
+    "maxAngularAcceleration": 300.0
   },
   "goalEndState": {
     "velocity": 0,

@@ -6,6 +6,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
+import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.math.MathUtil;
@@ -65,48 +66,53 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         // Create the swerve modules
         frontLeftModule = new MkSwerveModuleBuilder()
-            .withDriveMotor(MotorType.NEO, SDSConstants.FRONT_LEFT_MODULE_DRIVE_MOTOR)
-            .withSteerMotor(MotorType.NEO, SDSConstants.FRONT_LEFT_MODULE_STEER_MOTOR)
-            .withSteerEncoderPort(SDSConstants.FRONT_LEFT_MODULE_STEER_ENCODER)
-            .withSteerOffset(SDSConstants.FRONT_LEFT_MODULE_STEER_OFFSET)
-            .withLayout(
-                shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
-                .withSize(2, 4)
-                .withPosition(0, 0))
-            .build();
+        .withDriveMotor(MotorType.NEO, SDSConstants.FRONT_LEFT_MODULE_DRIVE_MOTOR)
+        .withSteerMotor(MotorType.NEO, SDSConstants.FRONT_LEFT_MODULE_STEER_MOTOR)
+        .withSteerEncoderPort(SDSConstants.FRONT_LEFT_MODULE_STEER_ENCODER)
+        .withSteerOffset(SDSConstants.FRONT_LEFT_MODULE_STEER_OFFSET)
+        .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+        .withLayout(
+            shuffleboardTab.getLayout("Front Left Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(0, 0)
+        ).build();
 
         frontRightModule = new MkSwerveModuleBuilder()
-            .withDriveMotor(MotorType.NEO, SDSConstants.FRONT_RIGHT_MODULE_DRIVE_MOTOR)
-            .withSteerMotor(MotorType.NEO, SDSConstants.FRONT_RIGHT_MODULE_STEER_MOTOR)
-            .withSteerEncoderPort(SDSConstants.FRONT_RIGHT_MODULE_STEER_ENCODER)
-            .withSteerOffset(SDSConstants.FRONT_RIGHT_MODULE_STEER_OFFSET)
-            .withLayout(
-                shuffleboardTab.getLayout("Front Right Module", BuiltInLayouts.kList)
-                .withSize(2, 4)
-                .withPosition(2, 0))
-            .build();
+        .withDriveMotor(MotorType.NEO, SDSConstants.FRONT_RIGHT_MODULE_DRIVE_MOTOR)
+        .withSteerMotor(MotorType.NEO, SDSConstants.FRONT_RIGHT_MODULE_STEER_MOTOR)
+        .withSteerEncoderPort(SDSConstants.FRONT_RIGHT_MODULE_STEER_ENCODER)
+        .withSteerOffset(SDSConstants.FRONT_RIGHT_MODULE_STEER_OFFSET)
+        .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+        .withLayout(
+            shuffleboardTab.getLayout("Front Right Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(2, 0)
+        ).build();
 
         backLeftModule = new MkSwerveModuleBuilder()
-            .withDriveMotor(MotorType.NEO, SDSConstants.BACK_LEFT_MODULE_DRIVE_MOTOR)
-            .withSteerMotor(MotorType.NEO, SDSConstants.BACK_LEFT_MODULE_STEER_MOTOR)
-            .withSteerEncoderPort(SDSConstants.BACK_LEFT_MODULE_STEER_ENCODER)
-            .withSteerOffset(SDSConstants.BACK_LEFT_MODULE_STEER_OFFSET)
-            .withLayout(
-                shuffleboardTab.getLayout("Back Left Module", BuiltInLayouts.kList)
-                .withSize(2, 4)
-                .withPosition(4, 0))
-            .build();
+        .withDriveMotor(MotorType.NEO, SDSConstants.BACK_LEFT_MODULE_DRIVE_MOTOR)
+        .withSteerMotor(MotorType.NEO, SDSConstants.BACK_LEFT_MODULE_STEER_MOTOR)
+        .withSteerEncoderPort(SDSConstants.BACK_LEFT_MODULE_STEER_ENCODER)
+        .withSteerOffset(SDSConstants.BACK_LEFT_MODULE_STEER_OFFSET)
+        .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+        .withLayout(
+            shuffleboardTab.getLayout("Back Left Module", BuiltInLayouts.kList)
+            .withSize(2, 4)
+            .withPosition(4, 0)
+        ).build();
+        
 
         backRightModule = new MkSwerveModuleBuilder()
-            .withDriveMotor(MotorType.NEO, SDSConstants.BACK_RIGHT_MODULE_DRIVE_MOTOR)
-            .withSteerMotor(MotorType.NEO, SDSConstants.BACK_RIGHT_MODULE_STEER_MOTOR)
-            .withSteerEncoderPort(SDSConstants.BACK_RIGHT_MODULE_STEER_ENCODER)
-            .withSteerOffset(SDSConstants.BACK_RIGHT_MODULE_STEER_OFFSET)
-            .withLayout(
-                shuffleboardTab.getLayout("Back Right Module", BuiltInLayouts.kList)
-                .withSize(2, 4)
-                .withPosition(6, 0))
-            .build();
+        .withDriveMotor(MotorType.NEO, SDSConstants.BACK_RIGHT_MODULE_DRIVE_MOTOR)
+        .withSteerMotor(MotorType.NEO, SDSConstants.BACK_RIGHT_MODULE_STEER_MOTOR)
+        .withSteerEncoderPort(SDSConstants.BACK_RIGHT_MODULE_STEER_ENCODER)
+        .withSteerOffset(SDSConstants.BACK_RIGHT_MODULE_STEER_OFFSET)
+        .withGearRatio(SdsModuleConfigurations.MK4I_L2)
+        .withLayout(
+            shuffleboardTab.getLayout("Back Right Module", BuiltInLayouts.kList)
+                        .withSize(2, 4)
+                        .withPosition(6, 0)
+        ).build();
 
 
         // Zero the swerve Gyro
@@ -139,23 +145,23 @@ public class DrivetrainSubsystem extends SubsystemBase {
         //PathPlanner
         // Configure AutoBuilder
         AutoBuilder.configureHolonomic(
-            this::robotPose, 
-            this::resetOdometry, 
-            this::getSpeeds, 
-            this::driveRobotRelative, 
-            PathPlannerConstants.pathFollowerConfig,
-            () -> {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                // This will flip the path being followed to the red side of the field.
-                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        this::robotPose, 
+        this::resetOdometry, 
+        this::getSpeeds, 
+        this::driveRobotRelative, 
+        PathPlannerConstants.pathFollowerConfig,
+        () -> {
+            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // This will flip the path being followed to the red side of the field.
+            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-                var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
-                return false;
-            },
-            this
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+        },
+        this
         );
 
         // Set up custom logging to add the current path to a field 2d widget
@@ -166,7 +172,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public void zeroGyroscope() {
         odometry.resetPosition(
-            Rotation2d.fromDegrees(getGyroYaw()), 
+            Rotation2d.fromDegrees(getGyroYaw(true)), 
             new SwerveModulePosition[] {
                 frontLeftModule.getPosition(),
                 frontRightModule.getPosition(),
@@ -186,13 +192,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public double getGyroYaw() {
-        StatusSignal<Double> gYaw = gyroscope.getYaw();
-        gYaw.refresh();
-        return gYaw.getValue();
+        return gyroscope.getYaw().getValue();
+    }
+
+    public double getGyroYaw(boolean invert) {
+        double yawV = gyroscope.getYaw().getValue();
+
+        if(invert) {
+            yawV = 360 - yawV;
+        }
+
+        return yawV;
     }
 
     public Rotation2d getRotation() {
         return odometry.getPoseMeters().getRotation();
+    }
+
+    public Pose2d getPos() {
+        return odometry.getPoseMeters();
     }
 
     // Auto Drive
@@ -243,7 +261,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         odometry.resetPosition(
-            Rotation2d.fromDegrees(getGyroYaw()), 
+            Rotation2d.fromDegrees(getGyroYaw(true)), 
             new SwerveModulePosition[] {
                 frontLeftModule.getPosition(),
                 frontRightModule.getPosition(),
@@ -263,7 +281,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         // Update the odometry, Important otherwise robot will be "lost"
         odometry.update(
-        Rotation2d.fromDegrees(getGyroYaw()),
+        Rotation2d.fromDegrees(getGyroYaw(true)),
         new SwerveModulePosition[] {
             frontLeftModule.getPosition(),
             frontRightModule.getPosition(),

@@ -35,7 +35,7 @@ public class CanCoderFactoryBuilder {
             CANcoder encoder = new CANcoder(configuration.getId(), configuration.getCanbus());
             CtreUtils.checkCtreError(encoder.getConfigurator().apply(config, 0.25), "Failed to configure CANCoder");
 
-            CtreUtils.checkCtreError(encoder.getPosition().setUpdateFrequency(1000.0 / periodMilliseconds, 0.25), "Failed to configure CANCoder update rate");
+            CtreUtils.checkCtreError(encoder.getAbsolutePosition().setUpdateFrequency(1000.0 / periodMilliseconds, 0.25), "Failed to configure CANCoder update rate");
 
             return new EncoderImplementation(encoder);
         };
@@ -52,14 +52,14 @@ public class CanCoderFactoryBuilder {
 
         @Override
         public double getAbsoluteAngle() {
-            StatusSignal<Double> angleCode = encoder.getPosition();
+            StatusSignal<Double> angleCode = encoder.getAbsolutePosition();
 
             for (int i = 0; i < ATTEMPTS; i++) {
                 if (angleCode.getStatus() == StatusCode.OK) break;
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) { }
-                angleCode = encoder.getPosition();
+                angleCode = encoder.getAbsolutePosition();
             }
 
             CtreUtils.checkCtreError(angleCode.getStatus(), "Failed to retrieve CANcoder "+encoder.getDeviceID()+" absolute position after "+ATTEMPTS+" tries");
