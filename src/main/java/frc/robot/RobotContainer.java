@@ -123,12 +123,13 @@ public class RobotContainer {
      */
     NamedCommands.registerCommand("marker1", Commands.print("Passed marker 1"));
     NamedCommands.registerCommand("marker2", Commands.print("Passed marker 2"));
+    NamedCommands.registerCommand("intakeup", Commands.print("Intake Up"));
     NamedCommands.registerCommand("print hello", Commands.print("hello"));
 
 
     // Add a button to run the example auto to SmartDashboard, this will also be in the auto chooser built above
     /* "Example Auto" is file to be deployed on the RoboRIO, This is created by using the PathPlanner Software */
-    SmartDashboard.putData("Example Auto", new PathPlannerAuto("Example Auto"));
+    SmartDashboard.putData("Auto 3", new PathPlannerAuto("Auto 3"));
 
     /* See more ways to program paths using PathPanner's example located on GitHub */
     /* Although most of the commands and paths are setup here, we also need to make sure that the DrivetrainSubsystem can handle PathPlanner */

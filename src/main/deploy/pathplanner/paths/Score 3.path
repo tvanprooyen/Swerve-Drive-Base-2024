@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.8314390832717273,
-        "y": 4.976101687444878
+        "x": 2.3185166370332744,
+        "y": 5.570593998325182
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.355572488922756,
-        "y": 4.275675218017103
+        "x": 1.969621539243079,
+        "y": 5.567662106752786
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "game piece 3"
     },
     {
       "anchor": {
-        "x": 3.025428273078769,
-        "y": 4.076143707842971
+        "x": 1.3509924162706242,
+        "y": 5.570593998325182
       },
       "prevControl": {
-        "x": 1.985013970027941,
-        "y": 4.133152710749866
+        "x": 1.7761166950906102,
+        "y": 5.5852534562225555
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "game piece 1"
+      "linkedName": "score"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "eventMarkers": [
     {
       "name": "Example Marker",
-      "waypointRelativePos": 0.5,
+      "waypointRelativePos": 0.75,
       "command": {
         "type": "sequential",
         "data": {
@@ -41,7 +41,24 @@
             {
               "type": "named",
               "data": {
-                "name": "marker1"
+                "name": "marker2"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0.15,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intakeup"
               }
             }
           ]
@@ -50,14 +67,14 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": 0.0,
     "rotateFast": false
   },
   "reversed": false,

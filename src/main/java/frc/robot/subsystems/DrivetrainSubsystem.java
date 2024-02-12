@@ -1,16 +1,23 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Pigeon2FeaturesConfigs;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.limelight.LimelightHelpers;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import com.swervedrivespecialties.swervelib.MechanicalConfiguration;
 import com.swervedrivespecialties.swervelib.MkSwerveModuleBuilder;
 import com.swervedrivespecialties.swervelib.MotorType;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,7 +26,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -40,7 +49,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     private final SwerveDriveOdometry odometry;
 
-    public final Pigeon2 gyroscope = new Pigeon2(SDSConstants.DRIVETRAIN_PIGEON_ID);
+    public final Pigeon2 gyroscope;
 
     public final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
             new Translation2d(SDSConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, SDSConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0),
@@ -61,7 +70,22 @@ public class DrivetrainSubsystem extends SubsystemBase {
     //Create Field for visualizing PathPlanner and Odometery
     private Field2d field = new Field2d();
 
+    // Odometery Vision 
+    //private SwerveDrivePoseEstimator swerveDrivePoseEstimator;
+
     public DrivetrainSubsystem() {
+
+        //Give devices time to start up (CANCoders, Pigeon, ect.)
+        Timer.delay(0.5);
+
+        gyroscope = new Pigeon2(SDSConstants.DRIVETRAIN_PIGEON_ID);
+
+        //Remove All Other StatusSignals, Only Using YAW
+        gyroscope.optimizeBusUtilization();
+
+        //Set at Default Frequency, This needs to happen in order for the getYaw to be used
+        gyroscope.getYaw().setUpdateFrequency(100);
+
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
 
         // Create the swerve modules
@@ -114,9 +138,33 @@ public class DrivetrainSubsystem extends SubsystemBase {
                         .withPosition(6, 0)
         ).build();
 
-
         // Zero the swerve Gyro
         gyroscope.setYaw(0.0);
+
+        //Get Latest Results from Limelight
+        /* LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
+
+        Pose2d initialPose = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
+
+        //Test if Limelight has a target
+        if(LimelightHelpers.getTV("")) {
+            //update the pose estimator with the vision measurement
+            initialPose = llresults.targetingResults.getBotPose2d();
+        }
+
+        swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
+            kinematics, 
+            Rotation2d.fromDegrees(getGyroYaw(true)), 
+            new SwerveModulePosition[] {
+                frontLeftModule.getPosition(),
+                frontRightModule.getPosition(),
+                backLeftModule.getPosition(),
+                backRightModule.getPosition()
+            }, 
+            initialPose
+        ); */
+
+            
 
         // Create the odometry
         odometry = new SwerveDriveOdometry(
@@ -135,7 +183,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         shuffleboardTab.addNumber("Pose Y", () -> odometry.getPoseMeters().getY());
 
         //Auto Rotate PID
-        RotatePID = new PIDController(0.01, 0.00, 0.00);
+        RotatePID = new PIDController(0.006, 0.00, 0.0001);
         RotatePID.enableContinuousInput(-180.0f,  180.0f);
         RotatePID.setTolerance(2);
 
@@ -172,7 +220,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public void zeroGyroscope() {
         odometry.resetPosition(
-            Rotation2d.fromDegrees(getGyroYaw(true)), 
+            Rotation2d.fromDegrees(getGyroYaw()), 
             new SwerveModulePosition[] {
                 frontLeftModule.getPosition(),
                 frontRightModule.getPosition(),
@@ -259,9 +307,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return this.rotateLock;
     }
 
+    //TODO Double Check if causing issue with pose estimator
     public void resetOdometry(Pose2d pose) {
         odometry.resetPosition(
-            Rotation2d.fromDegrees(getGyroYaw(true)), 
+            Rotation2d.fromDegrees(getGyroYaw()), 
             new SwerveModulePosition[] {
                 frontLeftModule.getPosition(),
                 frontRightModule.getPosition(),
@@ -281,13 +330,31 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
         // Update the odometry, Important otherwise robot will be "lost"
         odometry.update(
-        Rotation2d.fromDegrees(getGyroYaw(true)),
+        Rotation2d.fromDegrees(getGyroYaw()),
         new SwerveModulePosition[] {
             frontLeftModule.getPosition(),
             frontRightModule.getPosition(),
             backLeftModule.getPosition(),
             backRightModule.getPosition()
         });
+
+        /* swerveDrivePoseEstimator.update(
+        Rotation2d.fromDegrees(getGyroYaw(true)), 
+        new SwerveModulePosition[] {
+            frontLeftModule.getPosition(),
+            frontRightModule.getPosition(),
+            backLeftModule.getPosition(),
+            backRightModule.getPosition()
+        });
+
+        //Get Latest Results from Limelight
+        LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
+
+        //Test if Limelight has a target
+        if(LimelightHelpers.getTV("")) {
+            //update the pose estimator with the vision measurement
+            swerveDrivePoseEstimator.addVisionMeasurement(llresults.targetingResults.getBotPose2d(), llresults.targetingResults.timestamp_RIOFPGA_capture);
+        } */
 
         field.setRobotPose(robotPose());
 

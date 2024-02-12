@@ -3,45 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.025428273078769,
-        "y": 4.076143707842971
+        "x": 2.2598788054718972,
+        "y": 7.021880329474945
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8116445121779137,
-        "y": 4.261422967290379
+        "x": 1.790776152980878,
+        "y": 6.992561413701284
       },
       "isLocked": false,
       "linkedName": "game piece 1"
     },
     {
       "anchor": {
-        "x": 2.36982473964948,
-        "y": 4.503711229644682
+        "x": 1.3509924162706242,
+        "y": 5.570593998325182
       },
       "prevControl": {
-        "x": 2.840149013631361,
-        "y": 4.5322157310981295
-      },
-      "nextControl": {
-        "x": 2.0130347709404224,
-        "y": 4.482087595177466
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 1.903140836693123,
-        "y": 3.800192931333985
-      },
-      "prevControl": {
-        "x": 2.170293229475348,
-        "y": 4.061891457116247
+        "x": 1.7761166950906102,
+        "y": 5.5852534562225555
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "score"
     }
   ],
   "rotationTargets": [],
@@ -49,7 +33,7 @@
   "eventMarkers": [
     {
       "name": "Example Marker",
-      "waypointRelativePos": 0.8,
+      "waypointRelativePos": 0.75,
       "command": {
         "type": "sequential",
         "data": {
@@ -63,17 +47,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0.15,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intakeup"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 2.0,
-    "maxAngularVelocity": 300.0,
-    "maxAngularAcceleration": 300.0
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0,
+    "rotation": 0.0,
     "rotateFast": false
   },
   "reversed": false,

@@ -51,10 +51,10 @@ public class DriveCommand extends Command {
         if(drivetrain.getRotateLock()) {
             rotationPercent = -drivetrain.rotatePIDCalculation();
 
-            if(rotationPercent > 0.2) {
-                rotationPercent = 0.2;
-            } else if(rotationPercent < -0.2) {
-                rotationPercent = -0.2;
+            if(rotationPercent > 0.5) {
+                rotationPercent = 0.5;
+            } else if(rotationPercent < -0.5) {
+                rotationPercent = -0.5;
             }
         }
 

@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.3509924162706242,
+        "y": 5.570593998325182
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.7321383214195003,
+        "y": 5.204107551072246
+      },
+      "isLocked": false,
+      "linkedName": "score"
+    },
+    {
+      "anchor": {
+        "x": 2.289197721252586,
+        "y": 4.075329293515731
+      },
+      "prevControl": {
+        "x": 1.5122464530643351,
+        "y": 3.914075256721943
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "game piece 2"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}

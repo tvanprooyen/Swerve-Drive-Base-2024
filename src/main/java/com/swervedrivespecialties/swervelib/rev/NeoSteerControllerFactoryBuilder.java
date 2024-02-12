@@ -86,8 +86,14 @@ public final class NeoSteerControllerFactoryBuilder {
             RelativeEncoder integratedEncoder = motor.getEncoder();
             checkNeoError(integratedEncoder.setPositionConversionFactor(2.0 * Math.PI * mechConfiguration.getSteerReduction()), "Failed to set NEO encoder conversion factor");
             checkNeoError(integratedEncoder.setVelocityConversionFactor(2.0 * Math.PI * mechConfiguration.getSteerReduction() / 60.0), "Failed to set NEO encoder conversion factor");
-            checkNeoError(integratedEncoder.setPosition(absoluteEncoder.getAbsoluteAngle()), "Failed to set NEO encoder position");
-
+            
+            //If Absolute Encoder has a valid singal, than allow it to sync posistions
+            if(absoluteEncoder.isEncoderOK()){
+                checkNeoError(integratedEncoder.setPosition(absoluteEncoder.getAbsoluteAngle()), "Failed to set NEO encoder position");
+            } else {
+                checkNeoError(integratedEncoder.setPosition(0), "Failed to set NEO encoder position");
+            }
+            
             SparkPIDController controller = motor.getPIDController();
             if (hasPidConstants()) {
                 checkNeoError(controller.setP(pidProportional), "Failed to set NEO PID proportional constant");
@@ -145,10 +151,12 @@ public final class NeoSteerControllerFactoryBuilder {
             // end up getting a good reading. If we reset periodically this won't matter anymore.
             if (motorEncoder.getVelocity() < ENCODER_RESET_MAX_ANGULAR_VELOCITY) {
                 if (++resetIteration >= ENCODER_RESET_ITERATIONS) {
-                    resetIteration = 0;
-                    double absoluteAngle = absoluteEncoder.getAbsoluteAngle();
-                    motorEncoder.setPosition(absoluteAngle);
-                    currentAngleRadians = absoluteAngle;
+                    if(absoluteEncoder.isEncoderOK()){
+                        resetIteration = 0;
+                        double absoluteAngle = absoluteEncoder.getAbsoluteAngle();
+                        motorEncoder.setPosition(absoluteAngle);
+                        currentAngleRadians = absoluteAngle;
+                    }
                 }
             } else {
                 resetIteration = 0;
@@ -185,9 +193,11 @@ public final class NeoSteerControllerFactoryBuilder {
 
         @Override
         public void resetToAbsolute() {
-            resetIteration = 0;
-            double absoluteAngle = absoluteEncoder.getAbsoluteAngle();
-            motorEncoder.setPosition(absoluteAngle);
+            if(absoluteEncoder.isEncoderOK()){
+                resetIteration = 0;
+                double absoluteAngle = absoluteEncoder.getAbsoluteAngle();
+                motorEncoder.setPosition(absoluteAngle);
+            }
         }
     }
 }

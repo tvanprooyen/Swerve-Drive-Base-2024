@@ -12,4 +12,10 @@ public final class CtreUtils {
             DriverStation.reportError(String.format("%s: %s", message, code.toString()), false);
         }
     }
+
+    public static void reportWarning(String message) {
+        if (RobotBase.isReal()) {
+            DriverStation.reportWarning(String.format("%s", message), false);
+        }
+    }
 }

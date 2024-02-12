@@ -1,0 +1,84 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.289197721252586,
+        "y": 4.075329293515731
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.9227112739939773,
+        "y": 4.280561703980552
+      },
+      "isLocked": false,
+      "linkedName": "game piece 2"
+    },
+    {
+      "anchor": {
+        "x": 1.3509924162706242,
+        "y": 5.570593998325182
+      },
+      "prevControl": {
+        "x": 1.7761166950906102,
+        "y": 5.5852534562225555
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "score"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "Example Marker",
+      "waypointRelativePos": 0.75,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "marker2"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0.15,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "intakeup"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": null,
+  "useDefaultConstraints": false
+}

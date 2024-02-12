@@ -10,6 +10,13 @@ public interface AbsoluteEncoder {
     double getAbsoluteAngle();
 
     /**
+     * Are we ok to use encoder Absolute Angle?
+     */
+    default boolean isEncoderOK() {
+        return false;
+    };
+
+    /**
      * Returns the internal encoder object, if applicable
      * 
      * @return The internal encoder object.
