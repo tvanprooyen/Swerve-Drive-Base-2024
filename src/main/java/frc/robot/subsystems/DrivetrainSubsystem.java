@@ -69,6 +69,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     //Create Field for visualizing PathPlanner and Odometery
     private Field2d field = new Field2d();
+    //private Field2d field2 = new Field2d();
 
     // Odometery Vision 
     //private SwerveDrivePoseEstimator swerveDrivePoseEstimator;
@@ -87,6 +88,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
         gyroscope.getYaw().setUpdateFrequency(100);
 
         ShuffleboardTab shuffleboardTab = Shuffleboard.getTab("Drivetrain");
+
+        //Cameras
+        /* 
+         Setting Up LimeLight IP Address
+         https://docs.limelightvision.io/docs/docs-limelight/getting-started/networking
+         Use http://limelight.local:5801/ to setup a static IP address
+        */
+        /* ShuffleboardTab visionShuffleboardTab = Shuffleboard.getTab("Vision");
+        visionShuffleboardTab.addCamera("Front Camera", "Front LimeLight", "10.8.58.11");
+        visionShuffleboardTab.addCamera("Rear Camera", "Rear LimeLight", "10.8.58.12"); */
 
         // Create the swerve modules
         frontLeftModule = new MkSwerveModuleBuilder()
@@ -141,8 +152,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         // Zero the swerve Gyro
         gyroscope.setYaw(0.0);
 
-        //Get Latest Results from Limelight
-        /* LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
+        /* //Get Latest Results from Limelight
+        LimelightHelpers.LimelightResults llresults = LimelightHelpers.getLatestResults("");
 
         Pose2d initialPose = new Pose2d(0.0, 0.0, new Rotation2d(0.0));
 
@@ -212,10 +223,27 @@ public class DrivetrainSubsystem extends SubsystemBase {
         this
         );
 
+        dashboard();
+    }
+
+    /**
+     * All Smartdashboard Data Here, This gets called once upon setup
+    */
+    private void dashboard() {
+
         // Set up custom logging to add the current path to a field 2d widget
         PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
 
         SmartDashboard.putData("Field", field);
+
+        //SmartDashboard.putData("Field2", field2);
+
+        SmartDashboard.putNumber("Rotate Set Point", getPIDRotateValue());
+        SmartDashboard.putNumber("Rotate PID Calc", rotatePIDCalculation());
+    }
+
+    public void beforeauto() {
+        setRotateLock(false);
     }
 
     public void zeroGyroscope() {
@@ -261,21 +289,106 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return odometry.getPoseMeters();
     }
 
-    // Auto Drive
-    public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
+    /**
+     * Drives Field Relative Swerve
+     * @param fieldRelativeSpeeds
+     */
+    private void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
         driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, robotPose().getRotation()));
     }
 
-    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+    /**
+     * Drives Robot Relative Swerve
+     * @param fieldRelativeSpeeds
+     */
+    private void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
         ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
 
         this.chassisSpeeds = targetSpeeds;
     }
 
-    //Teleop Drive
+    /**
+     * Allows control of swerve drive system, this is defaults to Field Relitive Drive
+     * @param chassisSpeeds used with new ChassisSpeeds(), this is for all the joystick data
+     */
     public void drive(ChassisSpeeds chassisSpeeds) {
-        this.chassisSpeeds = chassisSpeeds;
+        driveFieldRelative(chassisSpeeds);
     }
+
+    /**
+     * Allows control of swerve drive system
+     * @param chassisSpeeds used with new ChassisSpeeds(), this is for all the joystick data
+     * @param robotRelative should the drive be robot relitive or field relitive?
+     */
+    public void drive(ChassisSpeeds chassisSpeeds, boolean robotRelative) {
+        if(robotRelative) {driveRobotRelative(chassisSpeeds);} else {driveFieldRelative(chassisSpeeds);}
+    }
+
+    /**
+     * Stops Swerve Drive
+     */
+    public void stop() {
+        this.chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+    }
+
+    //Auto Rotate
+    public double autoRotate(double rotation, int POV) {
+        return autoRotate(rotation, POV, false);
+    }
+
+    public double autoRotate(double rotation, int POV, boolean invertGyro) {
+
+        //double rotationPercent = rotation;
+
+        //Allows the Robot to angle its self if the POV is pressed and with in the deadband of the axis
+        if(rotation < 0.05 && rotation > -0.05) {
+            if(POV != -1) {
+
+                //Allow to invert if gyro is upside down
+                if(invertGyro) {
+                    //-360 flips the axis
+                    POV = 360 - POV;
+                }
+
+                setPIDRotateValue(POV);
+                setRotateLock(true);
+            }
+        } else {
+            setRotateLock(false);
+        }
+
+        if(getRotateLock()) {
+            return rotatePIDCalculation();
+        }
+
+        return rotation;
+    }
+
+    private void setPIDRotateValue(double RotateSet) {
+        this.RotateSet = RotateSet;
+    }
+
+    private double getPIDRotateValue() {
+        return this.RotateSet;
+    }
+
+    private double rotatePIDCalculation() {
+        double futureRotatePID = MathUtil.clamp(RotatePID.calculate(getRotation().getDegrees(), getPIDRotateValue()), -1, 1);
+
+        //Prevent Over Speed
+        futureRotatePID = MathUtil.clamp(futureRotatePID, -0.5, 0.5);
+
+        return -futureRotatePID;
+    }
+
+    private void setRotateLock(boolean rotateLock) {
+        this.rotateLock = rotateLock;
+    }
+
+    private boolean getRotateLock() {
+        return this.rotateLock;
+    }
+    //Auto Rotate
 
     public ChassisSpeeds getSpeeds() {
         return this.chassisSpeeds;
@@ -283,28 +396,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public SwerveModuleState[] robotModuleStates(){
         return kinematics.toSwerveModuleStates(this.chassisSpeeds);
-    }
-
-    public void setPIDRotateValue(double RotateSet) {
-        this.RotateSet = RotateSet;
-    }
-
-    public double getPIDRotateValue() {
-        return this.RotateSet;
-    }
-
-    public double rotatePIDCalculation() {
-        double futureRotatePID = MathUtil.clamp(RotatePID.calculate(getRotation().getDegrees(), RotateSet), -1, 1);
-
-        return futureRotatePID;
-    }
-
-    public void setRotateLock(boolean rotateLock) {
-        this.rotateLock = rotateLock;
-    }
-
-    public boolean getRotateLock() {
-        return this.rotateLock;
     }
 
     //TODO Double Check if causing issue with pose estimator
@@ -321,12 +412,23 @@ public class DrivetrainSubsystem extends SubsystemBase {
         );
     }
 
+    public void zeroPose() {
+        odometry.resetPosition(
+            Rotation2d.fromDegrees(getGyroYaw()), 
+            new SwerveModulePosition[] {
+                frontLeftModule.getPosition(),
+                frontRightModule.getPosition(),
+                backLeftModule.getPosition(),
+                backRightModule.getPosition()
+            }, 
+            new Pose2d()
+        );
+    }
+
     @Override
     public void periodic() {
 
         rotatePIDCalculation();
-
-        dashboard();
 
         // Update the odometry, Important otherwise robot will be "lost"
         odometry.update(
@@ -339,7 +441,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         });
 
         /* swerveDrivePoseEstimator.update(
-        Rotation2d.fromDegrees(getGyroYaw(true)), 
+        Rotation2d.fromDegrees(getGyroYaw()), 
         new SwerveModulePosition[] {
             frontLeftModule.getPosition(),
             frontRightModule.getPosition(),
@@ -354,9 +456,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
         if(LimelightHelpers.getTV("")) {
             //update the pose estimator with the vision measurement
             swerveDrivePoseEstimator.addVisionMeasurement(llresults.targetingResults.getBotPose2d(), llresults.targetingResults.timestamp_RIOFPGA_capture);
-        } */
+        }
 
-        field.setRobotPose(robotPose());
+        field.setRobotPose(robotPose()); */
+
+        //field2.setRobotPose(swerveDrivePoseEstimator.getEstimatedPosition());
 
         setModuleStates(robotModuleStates());
     }
@@ -366,18 +470,5 @@ public class DrivetrainSubsystem extends SubsystemBase {
         frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
         backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
         backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
-    }
-
-    public void stopModules() {
-        //Stop Modules
-        frontLeftModule.set(0, 0);
-        frontRightModule.set(0, 0);
-        backLeftModule.set(0, 0);
-        backRightModule.set(0, 0);
-    }
-
-    private void dashboard() {
-        SmartDashboard.putNumber("Rotate Set Point", getPIDRotateValue());
-        SmartDashboard.putNumber("Rotate PID Calc", rotatePIDCalculation());
     }
 }

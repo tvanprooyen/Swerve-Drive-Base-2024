@@ -39,12 +39,12 @@ public class CanCoderFactoryBuilder {
 
             CtreUtils.checkCtreError(encoder.getConfigurator().apply(config, 0.25), "Failed to configure CANCoder");
 
+            CtreUtils.checkCtreError(encoder.getAbsolutePosition().setUpdateFrequency(1000.0 / periodMilliseconds, 0.25), "Failed to configure CANCoder update rate");
+            CtreUtils.checkCtreError(encoder.getMagnetHealth().setUpdateFrequency(500, 0.25), "Failed to configure CANCoder Magnet Helth update rate");
+
             encoder.optimizeBusUtilization();
 
-            CtreUtils.checkCtreError(encoder.getAbsolutePosition().setUpdateFrequency(1000.0 / periodMilliseconds, 0.25), "Failed to configure CANCoder update rate");
-            CtreUtils.checkCtreError(encoder.getMagnetHealth().setUpdateFrequency(1000.0 / periodMilliseconds, 0.25), "Failed to configure CANCoder Magnet Helth update rate");
-
-            StatusSignal<MagnetHealthValue> magHealth = encoder.getMagnetHealth().refresh();
+            StatusSignal<MagnetHealthValue> magHealth = encoder.getMagnetHealth();
 
             if(magHealth.getValue() != MagnetHealthValue.Magnet_Green) {
                 CtreUtils.checkCtreError(magHealth.getStatus(), encoder.getDeviceID()+" Magnet Health is " + magHealth.getValue() +". Check if CANCoder Magnet is secure and undamaged.");                
@@ -112,7 +112,7 @@ public class CanCoderFactoryBuilder {
                 Timer.delay(0.0100);
             }
 
-            StatusSignal<MagnetHealthValue> magHealth = encoder.getMagnetHealth().refresh();
+            StatusSignal<MagnetHealthValue> magHealth = encoder.getMagnetHealth();
 
             //Check if magnet health is good, otherwise return no angle adjustment
             if(magHealth.getValue() == MagnetHealthValue.Magnet_Orange) {
@@ -135,7 +135,7 @@ public class CanCoderFactoryBuilder {
 
         @Override
         public boolean isEncoderOK() {
-            return encoder.getAbsolutePosition().refresh().getStatus() == StatusCode.OK && (encoder.getMagnetHealth().refresh().getValue() == MagnetHealthValue.Magnet_Green || encoder.getMagnetHealth().refresh().getValue() == MagnetHealthValue.Magnet_Orange);
+            return encoder.getAbsolutePosition().getStatus() == StatusCode.OK && (encoder.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Green || encoder.getMagnetHealth().getValue() == MagnetHealthValue.Magnet_Orange);
         }
     }
 

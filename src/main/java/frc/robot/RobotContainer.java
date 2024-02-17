@@ -47,9 +47,9 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     //Register the Drivetrain
-    drivetrain.register();
+    //drivetrain.register(); Unnecessary Method Call
 
-    //Set Drive Controls
+    //Set Drive Controls and Register the Drivetrain
     drivetrain.setDefaultCommand(new DriveCommand(
             drivetrain,
             () -> xLimiter.calculate(modifyAxis(m_driverController.getLeftY())), // Axes are flipped here on purpose
@@ -80,6 +80,9 @@ public class RobotContainer {
   private void configureBindings() {
     //Zero the Gyroscope
     m_driverController.start().whileTrue(new InstantCommand(drivetrain::zeroGyroscope));
+
+    //Zero Pose
+    m_driverController.back().whileTrue(new InstantCommand(drivetrain::zeroPose));
   }
 
   public DrivetrainSubsystem getDrivetrain() {
@@ -143,6 +146,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous 
+    //return Commands.sequence(new InstantCommand(drivetrain::beforeauto), autoChooser.getSelected());
     return autoChooser.getSelected();
   }
 }

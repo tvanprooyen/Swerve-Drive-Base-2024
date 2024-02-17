@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3509924162706242,
-      "y": 5.570593998325182
+      "x": 2.0,
+      "y": 7.0
     },
     "rotation": 0
   },
@@ -14,19 +14,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Pickup 2"
+            "pathName": "Test Path"
           }
         },
         {
           "type": "wait",
           "data": {
             "waitTime": 1.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Score 2"
           }
         }
       ]

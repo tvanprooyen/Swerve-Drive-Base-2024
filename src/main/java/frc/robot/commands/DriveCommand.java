@@ -4,6 +4,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
@@ -13,6 +14,7 @@ public class DriveCommand extends Command {
     private final DoubleSupplier translationYSupplier;
     private final DoubleSupplier rotationSupplier;
     private final IntSupplier povSupplier;
+    private final BooleanSupplier robotRelativeSupplier;
 
     public DriveCommand(
             DrivetrainSubsystem drivetrain,
@@ -26,7 +28,58 @@ public class DriveCommand extends Command {
         this.translationYSupplier = translationYSupplier;
         this.rotationSupplier = rotationSupplier;
         this.povSupplier = povSupplier;
+        this.robotRelativeSupplier = () -> false;
 
+        addRequirements(drivetrain);
+    }
+
+    public DriveCommand(
+            DrivetrainSubsystem drivetrain,
+            DoubleSupplier translationXSupplier,
+            DoubleSupplier translationYSupplier,
+            DoubleSupplier rotationSupplier,
+            IntSupplier povSupplier,
+            BooleanSupplier robotRelativeSupplier
+    ) {
+        this.drivetrain = drivetrain;
+        this.translationXSupplier = translationXSupplier;
+        this.translationYSupplier = translationYSupplier;
+        this.rotationSupplier = rotationSupplier;
+        this.povSupplier = povSupplier;
+        this.robotRelativeSupplier = robotRelativeSupplier;
+
+        addRequirements(drivetrain);
+    }
+
+    public DriveCommand(
+            DrivetrainSubsystem drivetrain,
+            DoubleSupplier translationXSupplier,
+            DoubleSupplier translationYSupplier,
+            DoubleSupplier rotationSupplier
+    ) {
+        this.drivetrain = drivetrain;
+        this.translationXSupplier = translationXSupplier;
+        this.translationYSupplier = translationYSupplier;
+        this.rotationSupplier = rotationSupplier;
+        this.povSupplier = () -> -1;
+        this.robotRelativeSupplier = () -> false;
+
+        addRequirements(drivetrain);
+    }
+
+    public DriveCommand(
+            DrivetrainSubsystem drivetrain,
+            DoubleSupplier translationXSupplier,
+            DoubleSupplier translationYSupplier,
+            DoubleSupplier rotationSupplier,
+            BooleanSupplier robotRelativeSupplier
+    ) {
+        this.drivetrain = drivetrain;
+        this.translationXSupplier = translationXSupplier;
+        this.translationYSupplier = translationYSupplier;
+        this.rotationSupplier = rotationSupplier;
+        this.povSupplier = () -> -1;
+        this.robotRelativeSupplier = robotRelativeSupplier;
         addRequirements(drivetrain);
     }
 
@@ -36,42 +89,26 @@ public class DriveCommand extends Command {
         double translationYPercent = translationYSupplier.getAsDouble();
         double rotationPercent = rotationSupplier.getAsDouble();
         int povPos = povSupplier.getAsInt();
-
-        //Allows the Robot to angle its self if the POV is pressed and with in the deadband of the axis
-        if(rotationPercent < 0.05 && rotationPercent > -0.05) {
-            if(povPos != -1) {
-                //-360 flips the axis
-                drivetrain.setPIDRotateValue(360 - povPos);
-                drivetrain.setRotateLock(true);
-            }
-        } else {
-            drivetrain.setRotateLock(false);
-        }
-
-        if(drivetrain.getRotateLock()) {
-            rotationPercent = -drivetrain.rotatePIDCalculation();
-
-            if(rotationPercent > 0.5) {
-                rotationPercent = 0.5;
-            } else if(rotationPercent < -0.5) {
-                rotationPercent = -0.5;
-            }
-        }
+        boolean robotRelative = robotRelativeSupplier.getAsBoolean();
 
         drivetrain.drive(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translationXPercent * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                        translationYPercent * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-                        rotationPercent * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                        drivetrain.getRotation()
-                )
+            new ChassisSpeeds(
+                -translationXPercent * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                -translationYPercent * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+                -drivetrain.autoRotate(
+                    rotationPercent, 
+                    povPos,
+                    true
+                ) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+            ),
+            robotRelative
         );
     }
 
     @Override
     public void end(boolean interrupted) {
         // Stop the drivetrain
-        drivetrain.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
+        drivetrain.stop();
     }
 
     public DrivetrainSubsystem getDrivetrain() {
